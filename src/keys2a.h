@@ -87,6 +87,7 @@ int ReadKeyPositions(const char *filename, keypt_t **info);
  * PI).  Then the descriptor vector for each keypoint is given as a
  * list of integers in range [0,255]. */
 int ReadKeys(FILE *fp, unsigned char **keys, keypt_t **info = NULL);
+int ReadKeysBin(FILE *fp, unsigned char **keys, keypt_t **info = NULL);
 int ReadKeysGzip(gzFile fp, unsigned char **keys, keypt_t **info = NULL);
 
 /* Read keys using MMAP to speed things up */

@@ -18,35 +18,36 @@
 /* Read in keys, match, write results to a file */
 
 #include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "keys2.h"
+#include "keys2a.h"
 
 int main(int argc, char **argv) {
     char *keys1_in;
     char *keys2_in;
     char *file_out;
-    double ratio;
+    double ratio, threshold;
     
-    if (argc != 4) {
-	printf("Usage: %s <keys1.in> <keys2.in> <out.txt>\n", argv[0]);
-	return -1;
+    if (argc != 6) {
+		printf("Usage: %s <keys1.in> <keys2.in> <out.txt> <ratio> <threshold>\n", argv[0]);
+		return -1;
     }
     
     keys1_in = argv[1];
     keys2_in = argv[2];
-    ratio = 0.6; // atof(argv[3]);
     file_out = argv[3];
+
+    ratio 		= atof(argv[4]);
+    threshold 	= atof(argv[5]);
 
     clock_t start = clock();
 
-    short int *keys1, *keys2;
+    unsigned char *keys1, *keys2;
 
     int num1 = ReadKeyFile(keys1_in, &keys1);
     int num2 = ReadKeyFile(keys2_in, &keys2);
 
-    clock_t end = clock();    
-    printf("Reading keys took %0.3fs\n", 
-	   (end - start) / ((double) CLOCKS_PER_SEC));
 
     /* Compute likely matches between two sets of keypoints */
     std::vector<KeypointMatch> matches = 
@@ -60,7 +61,7 @@ int main(int argc, char **argv) {
     int num_matches = (int) matches.size();
     // int num_matches_sym = (int) matches_sym.size();
 
-    printf("num_matches = %d\n", num_matches);
+ //   printf("num_matches = %d\n", num_matches);
     // printf("num_matches_sym = %d\n", num_matches_sym);
 
 #if 0
@@ -83,16 +84,41 @@ int main(int argc, char **argv) {
     }
 #endif
 
-    if (num_matches >= 16) {
-	FILE *f = fopen(file_out, "w");
+    clock_t end = clock();    
+
+	int m = (num1 < num2 ? num1 : num2);
+	float r = ((float)num_matches * 100 / m);
+
+	bool used = false;
+	
+    if (num_matches >= 16 && r > threshold) {
+		used = true;
+	
+		FILE *f = fopen(file_out, "w");
 		
-	/* Write the number of matches */
-	fprintf(f, "%d\n", (int) matches.size());
+		/* Write the number of matches */
+		fprintf(f, "%d\n", (int) matches.size());
 
-	for (int i = 0; i < num_matches; i++) {
-	    fprintf(f, "%d %d\n", matches[i].m_idx1, matches[i].m_idx2);
-	}
+		for (int i = 0; i < num_matches; i++) {
+		    fprintf(f, "%d %d\n", matches[i].m_idx1, matches[i].m_idx2);
+		}
 
-	fclose(f);
+		fclose(f);
     }
+
+	
+  if(used) printf("\n%8d matches (%4.1f%%) took %5.2fs for %s\t", 
+		num_matches,
+		r,
+	   (end - start) / ((double) CLOCKS_PER_SEC),
+		file_out);
+
+		
+/*    printf("%8d matches = %5.2f%% %d in %6.3fs in %s\n", 
+		num_matches,
+		r,
+		m,
+	   (end - start) / ((double) CLOCKS_PER_SEC),
+		file_out);
+		*/
 }

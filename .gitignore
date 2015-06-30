@@ -12,6 +12,7 @@ bin/Bundle2PMVS
 bin/Bundle2Ply
 bin/Bundle2Vis
 bin/KeyMatchFull
+bin/KeyMatch
 bin/RadialUndistort
 bin/bundler
 lib/ann_1.1_char/lib
@@ -22,6 +23,7 @@ src/Bundle2PMVS
 src/Bundle2Ply
 src/Bundle2Vis
 src/KeyMatchFull
+src/KeyMatch
 src/RadialUndistort
 src/bundler
 

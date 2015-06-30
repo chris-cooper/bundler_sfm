@@ -13,12 +13,14 @@ OS=$(shell uname -o)
 ifeq ($(OS), Cygwin)
 BUNDLER=bundler.exe
 KEYMATCHFULL=KeyMatchFull.exe
+KEYMATCH=KeyMatch.exe
 BUNDLE2PMVS=Bundle2PMVS.exe
 BUNDLE2VIS=Bundle2Vis.exe
 RADIALUNDISTORT=RadialUndistort.exe
 else
 BUNDLER=bundler
 KEYMATCHFULL=KeyMatchFull
+KEYMATCH=KeyMatch
 BUNDLE2PLY=Bundle2Ply
 BUNDLE2PMVS=Bundle2PMVS
 BUNDLE2VIS=Bundle2Vis
@@ -62,7 +64,7 @@ endif
 
 CPPFLAGS=$(OPTFLAGS) $(OTHERFLAGS) $(INCLUDE_PATH)
 
-all: $(BUNDLER) $(KEYMATCHFULL) $(BUNDLE2PLY) $(BUNDLE2PMVS) $(BUNDLE2VIS) $(RADIALUNDISTORT)
+all: $(BUNDLER) $(KEYMATCHFULL) $(KEYMATCH) $(BUNDLE2PLY) $(BUNDLE2PMVS) $(BUNDLE2VIS) $(RADIALUNDISTORT)
 
 %.o : %.cpp
 	$(CXX) -c -o $@ $(CPPFLAGS) $(WXFLAGS) $(BUNDLER_DEFINES) $<
@@ -74,6 +76,11 @@ $(BUNDLER): $(BUNDLER_OBJS)
 
 $(KEYMATCHFULL): KeyMatchFull.o keys2a.o
 	$(CXX) -o $@ $(CPPFLAGS) $(LIB_PATH) KeyMatchFull.o keys2a.o \
+		-lANN_char -lz
+	cp $@ ../bin
+
+$(KEYMATCH): KeyMatch.o keys2a.o
+	$(CXX) -o $@ $(CPPFLAGS) $(LIB_PATH) KeyMatch.o keys2a.o \
 		-lANN_char -lz
 	cp $@ ../bin
 
@@ -107,5 +114,5 @@ MatchDraw2: MatchDraw2.o keys_lite.o LoadJPEG.o
 	cp $@ ../../bin
 
 clean:
-	rm -f *.o *~ $(BUNDLER) $(KEYMATCHFULL) $(BUNDLE2PMVS) \
+	rm -f *.o *~ $(BUNDLER) $(KEYMATCHFULL) $(KEYMATCH) $(BUNDLE2PMVS) \
 		$(BUNDLE2VIS) $(RADIALUNDISTORT)

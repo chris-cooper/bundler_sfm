@@ -92,15 +92,15 @@ int ReadKeyFile(const char *filename, unsigned char **keys, keypt_t **info)
     if (! file) {
         /* Try to file a gzipped keyfile */
         char buf[1024];
-        sprintf(buf, "%s.gz", filename);
-        gzFile gzf = gzopen(buf, "rb");
+        sprintf(buf, "%s.bin", filename);
+        FILE *binfile = fopen(buf, "rb");
 
-        if (gzf == NULL) {
+        if (binfile == NULL) {
             printf("Could not open file: %s\n", filename);
             return 0;
         } else {
-            int n = ReadKeysGzip(gzf, keys, info);
-            gzclose(gzf);
+            int n = ReadKeysBin(binfile, keys, info);
+            fclose(binfile);
             return n;
         }
     }
@@ -252,6 +252,47 @@ int ReadKeys(FILE *fp, unsigned char **keys, keypt_t **info)
     return num; // kps;
 }
 
+int ReadKeysBin(FILE* fp, unsigned char **keys, keypt_t **info)
+{
+    
+    int32_t num_keys;
+    fread(&num_keys, sizeof(int), 1, fp);
+//	printf("num_keys: %d\n", num_keys);
+	
+	
+    *keys = new unsigned char[128 * num_keys + 8];
+	
+    if (info != NULL) 
+        *info = new keypt_t[num_keys];
+
+    unsigned char *p = *keys;
+    for (int i = 0; i < num_keys; i++) {
+        /* Allocate memory for the keypoint. */
+        // short int *d = new short int[128];
+        float x, y, scale, ori;
+
+	    fread(&x, 		sizeof(float), 1, fp);
+	    fread(&y, 		sizeof(float), 1, fp);
+	    fread(&scale, 	sizeof(float), 1, fp);
+	    fread(&ori, 	sizeof(float), 1, fp);
+	
+        if (info != NULL) {
+            (*info)[i].x = x;
+            (*info)[i].y = y;
+            (*info)[i].scale = scale;
+            (*info)[i].orient = ori;
+        }
+		
+	    fread(p, 	sizeof(unsigned char), 128, fp);
+	
+//		printf("key %d: %f, %f, %f, %f - %d\n", i, x, y, scale, ori, *p);
+	
+        p += 128;
+	}
+	
+	
+	return num_keys;
+}
 int ReadKeysGzip(gzFile fp, unsigned char **keys, keypt_t **info)
 {
     int i, num, len;
