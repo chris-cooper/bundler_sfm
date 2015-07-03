@@ -50,8 +50,8 @@ CERES_LIBS=-lceres -lcholmod -lccolamd -lcolamd -lamd -lcamd -lcxsparse \
 # if we are using Ceres, add to options
 ifeq ($(USE_CERES),true)
 # Edit these two variables as needed
-CERES_INCLUDE_PATH=
-CERES_LIB_PATH=
+CERES_INCLUDE_PATH=-I../../../include
+CERES_LIB_PATH=-L../../../lib
 BUNDLER_DEFINES+=-D__USE_CERES__
 BUNDLER_LIBS=$(CERES_LIBS) $(BUNDLER_BASE_LIBS)
 BUNDLER_OBJS+=BundleCeres.o
